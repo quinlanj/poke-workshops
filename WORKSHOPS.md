@@ -165,10 +165,7 @@ const styles = StyleSheet.create({
 
 ```js
 // package.json
-"react-navigation": "4.0.10",
-"react-navigation-tabs": "2.5.6",
-"react-navigation-stack": "1.10.3",
-"react-navigation-drawer": "2.3.1"
+"react-navigation": "3.0.0-rc.5",
 ```
 
 ```js
@@ -176,8 +173,7 @@ const styles = StyleSheet.create({
 import * as React from "react";
 import Pokemon from "./screens/Pokemon";
 import PokemonDetails from "./screens/PokemonDetails";
-import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
+import { createAppContainer, createStackNavigator } from "react-navigation";
 
 const FavPokemonStack = createStackNavigator({
   FavPokemon: {
@@ -244,12 +240,19 @@ return (
 
 ```js
 // App.js
+import {
+  createAppContainer,
+  createStackNavigator,
+  createBottomTabNavigator
+} from "react-navigation";
+//...
+
 const AppNavigator = createBottomTabNavigator({
   FavPokemon: FavPokemonStack
 });
 
 // we can remove unnecessary App Component
-export default AppNavigator;
+export default createAppContainer(AppNavigator);
 ```
 
 11. One tab looks kinda bad, so let's add another one with and a new screen, which will display a list of Pokemons `screens/PokemonList.js`:
@@ -258,7 +261,7 @@ export default AppNavigator;
 // screens/PokemonList.js
 import * as React from "react";
 import { Text, View, StyleSheet } from "react-native";
-import { Constants } from "expo";
+import Constants from "expo-constants";
 
 export default class PokemonList extends React.Component {
   render() {
@@ -308,7 +311,7 @@ const AppNavigator = createBottomTabNavigator(
     Pokemons: PokemonList
   },
   {
-    navigationOptions: ({ navigation }) => ({
+    defaultNavigationOptions: ({ navigation }) => ({
       tabBarIcon: ({ focused, horizontal, tintColor }) => {
         const { routeName } = navigation.state;
         let iconName;
@@ -334,27 +337,33 @@ const AppNavigator = createBottomTabNavigator(
 13. The app looks much better. But `screens/PokemonList.js` doesn't display anything interesting – let's implement it, so it will show a list of Pokemons.
 
 ```js
-import * as React from 'react';
-import { Text, View, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
-import { Constants } from 'expo';
+import * as React from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  FlatList
+} from "react-native";
+import Constants from "expo-constants";
 
 export default class PokemonList extends React.Component {
   state = {
     loading: true,
     error: false,
-    pokemons: [],
-  }
+    pokemons: []
+  };
 
   fetchPokemons = async () => {
     try {
       // unfotunately PokeApi has broken query/limit right now, so we cannot explain paging...
-      const response = await fetch('https://pokeapi.co/api/v2/pokemon/');
+      const response = await fetch("https://pokeapi.co/api/v2/pokemon/");
       const json = await response.json();
       const { results } = json;
       const pokemons = results.slice(0, 20); // makes more sense, but try out all results to see RN performance!
       this.setState({
         loading: false,
-        pokemons,
+        pokemons
       });
     } catch (err) {
       this.setState({ loading: false, error: true });
@@ -366,10 +375,8 @@ export default class PokemonList extends React.Component {
   }
 
   renderPokemon = ({ item }) => {
-    return (
-      <Text style={styles.text}>{item.name}</Text>
-    );
-  }
+    return <Text style={styles.text}>{item.name}</Text>;
+  };
 
   keyExtractor = (item, index) => index;
 
@@ -377,7 +384,7 @@ export default class PokemonList extends React.Component {
     if (this.state.loading) {
       return (
         <View style={styles.container}>
-          <ActivityIndicator color="red"/>
+          <ActivityIndicator color="red" />
         </View>
       );
     }
@@ -403,21 +410,20 @@ export default class PokemonList extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: Constants.statusBarHeight,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: Constants.statusBarHeight
   },
   text: {
     fontSize: 30,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    margin: 5,
+    fontWeight: "bold",
+    textAlign: "center",
+    margin: 5
   },
   listContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white"
   }
-});
 });
 ```
 
@@ -465,7 +471,10 @@ const PokemonListStack = createStackNavigator(
   }
 );
 
+// Change PokemonList -> PokemonListStack
 const AppNavigator = createBottomTabNavigator(
+  FavPokemon: FavPokemonStack,
+  Pokemons: PokemonListStack
 ```
 
 ```js
@@ -523,6 +532,8 @@ const PokemonListStack = createStackNavigator(
 
 ```js
 // screens/PokemonList.js
+import { Button } from "react-native-paper";
+//...
 renderPokemon = ({ item }) => {
   return (
     <Button
