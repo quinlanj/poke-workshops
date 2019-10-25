@@ -14,7 +14,8 @@
 // App.js
 import * as React from "react";
 import { Text, View, StyleSheet, ActivityIndicator, Image } from "react-native";
-import { Constants } from "expo";
+import Constants from "expo-constants";
+import "regenerator-runtime";
 
 export default class App extends React.Component {
   state = {
@@ -93,6 +94,13 @@ const styles = StyleSheet.create({
 });
 ```
 
+In `package.json`, add the newest version of `regenerator-runtime`.
+
+```js
+// package.json
+"regenerator-runtime": "0.13.3"
+```
+
 6. This app looks kinda static – it's about time to add some navigation. Move the code from `App.js` to a new file `screens/Pokemon.js`, and change `App.js` to:
 
 ```js
@@ -113,7 +121,8 @@ export default class App extends React.Component {
 // screens/PokemonDetails.js
 import * as React from "react";
 import { Text, View, StyleSheet } from "react-native";
-import { Constants } from "expo";
+import Constants from "expo-constants";
+import "regenerator-runtime";
 
 export default class PokemonDetails extends React.Component {
   render() {
@@ -156,7 +165,10 @@ const styles = StyleSheet.create({
 
 ```js
 // package.json
-"react-navigation": "2.18.2"
+"react-navigation": "4.0.10",
+"react-navigation-tabs": "2.5.6",
+"react-navigation-stack": "1.10.3",
+"react-navigation-drawer": "2.3.1"
 ```
 
 ```js
@@ -164,7 +176,8 @@ const styles = StyleSheet.create({
 import * as React from "react";
 import Pokemon from "./screens/Pokemon";
 import PokemonDetails from "./screens/PokemonDetails";
-import { createStackNavigator } from "react-navigation";
+import { createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 
 const FavPokemonStack = createStackNavigator({
   FavPokemon: {
@@ -175,11 +188,7 @@ const FavPokemonStack = createStackNavigator({
   }
 });
 
-export default class App extends React.Component {
-  render() {
-    return <FavPokemonStack />;
-  }
-}
+export default createAppContainer(FavPokemonStack);
 ```
 
 9. Now we have to navigate from `screens/Pokemon.js` to `screens/PokemonDetails.js`. We will use a nice Button from `react-native-paper` components package, which was already provided in Snack example:
